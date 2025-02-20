@@ -17,15 +17,13 @@
 #include <linux/socket.h>
 #include <linux/types.h>
 
-#define OVPN_SKB_CB(skb) ((struct ovpn_skb_cb *)&((skb)->cb))
 
-struct ovpn_skb_cb {
-	union {
-		struct in_addr ipv4;
-		struct in6_addr ipv6;
-	} local;
-	sa_family_t sa_fam;
+struct ovpn_async_skb_cb {
+	struct ovpn_peer *peer;
+	struct ovpn_crypto_key_slot *ks;
+	struct sk_buff *nskb;
 };
+#define OVPN_ASYNC_SKB_CB(skb)	((struct ovpn_async_skb_cb *)&((skb)->cb))
 
 /* Return IP protocol version from skb header.
  * Return 0 if protocol is not IPv4/IPv6 or cannot be read.

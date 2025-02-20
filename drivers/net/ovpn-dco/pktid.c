@@ -32,7 +32,7 @@ int ovpn_pktid_recv(struct ovpn_pktid_recv *pr, u32 pkt_id, u32 pkt_time)
 	const unsigned long now = jiffies;
 	int ret;
 
-	spin_lock(&pr->lock);
+	spin_lock_bh(&pr->lock);
 
 	/* expire backtracks at or below pr->id after PKTID_RECV_EXPIRE time */
 	if (unlikely(time_after_eq(now, pr->expire)))
@@ -122,6 +122,6 @@ int ovpn_pktid_recv(struct ovpn_pktid_recv *pr, u32 pkt_id, u32 pkt_time)
 	pr->expire = now + PKTID_RECV_EXPIRE;
 	ret = 0;
 out:
-	spin_unlock(&pr->lock);
+	spin_unlock_bh(&pr->lock);
 	return ret;
 }
