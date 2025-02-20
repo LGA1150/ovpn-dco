@@ -90,13 +90,13 @@ int ovpn_aead_encrypt(struct ovpn_crypto_key_slot *ks, struct sk_buff *skb, u32 
 	if (unlikely(ret < 0))
 		goto free_req;
 
-	nskb = __alloc_skb(skb->len + NET_IP_ALIGN + LL_MAX_HEADER + 32, GFP_KERNEL, 0, NUMA_NO_NODE);
+	nskb = __alloc_skb(skb->len + NET_IP_ALIGN + NET_SKB_PAD + 32, GFP_KERNEL, 0, NUMA_NO_NODE);
 	if (unlikely(!nskb)) {
 		ret = -ENOMEM;
 		goto free_req;
 	}
 
-	skb_reserve(nskb, NET_IP_ALIGN + LL_MAX_HEADER);
+	skb_reserve(nskb, NET_IP_ALIGN + NET_SKB_PAD);
 	dsg = (struct scatterlist *)nskb->cb;
 	sg_init_table(dsg, 2);
 	sg_set_buf(dsg + 1, __skb_put(nskb, skb->len), SKB_DATA_ALIGN(skb->len + AUTH_TAG_SIZE));
@@ -196,11 +196,13 @@ int ovpn_aead_decrypt(struct ovpn_crypto_key_slot *ks, struct sk_buff *skb)
 		goto free_req;
 	}
 
-	nskb = __alloc_skb(payload_len + NET_IP_ALIGN + LL_MAX_HEADER + 32, GFP_KERNEL, 0, NUMA_NO_NODE);
-	if (!nskb)
-		return -ENOMEM;
+	nskb = __alloc_skb(payload_len + NET_IP_ALIGN + NET_SKB_PAD + 32, GFP_KERNEL, 0, NUMA_NO_NODE);
+	if ((unlikely(!nskb))) {
+		ret = -ENOMEM;
+		goto free_req;
+	}
 
-	skb_reserve(nskb, NET_IP_ALIGN + LL_MAX_HEADER);
+	skb_reserve(nskb, NET_IP_ALIGN + NET_SKB_PAD);
 	dsg = (struct scatterlist *)nskb->cb;
 	sg_init_table(dsg, 2);
 	sg_set_buf(dsg, skb->data, NONCE_WIRE_SIZE + OVPN_OP_SIZE_V2);
