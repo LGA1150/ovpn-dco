@@ -12,6 +12,8 @@
 
 #include "crypto.h"
 
+#define AUTH_TAG_SIZE	16
+
 #include <asm/types.h>
 #include <linux/skbuff.h>
 

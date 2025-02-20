@@ -26,7 +26,6 @@ static int ovpn_tcp_read_sock(read_descriptor_t *desc, struct sk_buff *in_skb,
 {
 	struct sock *sk = desc->arg.data;
 	struct ovpn_socket *sock;
-	struct ovpn_skb_cb *cb;
 	struct ovpn_peer *peer;
 	size_t chunk, copied = 0;
 	int status;
@@ -92,10 +91,6 @@ static int ovpn_tcp_read_sock(read_descriptor_t *desc, struct sk_buff *in_skb,
 			/* keep on reading until we get the full packet */
 			if (peer->tcp.offset != peer->tcp.data_len)
 				goto next_read;
-
-			/* do not perform IP caching for TCP connections */
-			cb = OVPN_SKB_CB(peer->tcp.skb);
-			cb->sa_fam = AF_UNSPEC;
 
 			/* At this point we know the packet is from a configured peer.
 			 * DATA_V2 packets are handled in kernel space, the rest goes to user space.
